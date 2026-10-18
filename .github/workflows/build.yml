@@ -1,0 +1,31 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-15-intel, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build and run fixture tests
+        run: python3 scripts/build.py --test
+      - uses: actions/upload-artifact@v7
+        with:
+          name: MihomoController-${{ matrix.os }}
+          path: dist/*.zip
+          if-no-files-found: error
+          retention-days: 14
